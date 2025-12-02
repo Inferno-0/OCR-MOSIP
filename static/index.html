@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR MOSIP - Document Verification System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="navbar">
+    <div class="navbar-container">
+        <div class="navbar-brand">
+            <div class="logo">📄</div>
+            <div class="brand-text">
+                <h1>OCR MOSIP</h1>
+                <p>Document Extraction & Verification</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="content-wrapper">
+        <div class="upload-section">
+            <h2>Upload Document</h2>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*,application/pdf" hidden>
+                <div class="upload-content">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p class="upload-text">Drop your document here or click to browse</p>
+                    <p class="upload-hint">Supports JPG, PNG, PDF (Max 10MB)</p>
+                </div>
+            </div>
+            <div id="previewContainer" class="preview-container">
+                <img id="imagePreview" src="" alt="Document Preview" class="preview-image hidden" />
+                <p id="placeholderText" class="placeholder-text">No document selected</p>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Extracted Information</h2>
+            <form id="dataForm" class="form-grid">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="Enter full name">
+                    <div class="confidence-badge" data-field="name"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="text" id="age" placeholder="Enter age">
+                    <div class="confidence-badge" data-field="age"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <input type="text" id="gender" placeholder="Enter gender">
+                    <div class="confidence-badge" data-field="gender"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter email">
+                    <div class="confidence-badge" data-field="email"></div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="address">Address</label>
+                    <textarea id="address" placeholder="Enter address" rows="3"></textarea>
+                    <div class="confidence-badge" data-field="address"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" placeholder="Enter phone number">
+                    <div class="confidence-badge" data-field="phone"></div>
+                </div>
+            </form>
+
+            <div class="button-group">
+                <button id="extractBtn" class="btn btn-primary" disabled>Extract Data</button>
+                <button id="verifyBtn" class="btn btn-secondary" disabled>Verify</button>
+                <button type="reset" form="dataForm" class="btn btn-tertiary">Clear</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
