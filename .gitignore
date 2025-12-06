@@ -1,5 +1,20 @@
+# 1. System & Python Junk
 venv/
-_pycache_/
+__pycache__/
 .vscode/
+*.pyc
+
+# 2. Heavy Models (Ignore folders entirely)
+models/
+.EasyOCR/
 *.safetensors
 **/*.safetensors
+
+# 3. Output & Logs
+debug_crops/
+ocr_results.txt
+
+# 4. Test Images (Ignore all JPG/PNGs in the root folder)
+*.jpg
+*.jpeg
+*.png
