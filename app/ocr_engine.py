@@ -6,7 +6,7 @@ import logging
 import re
 import shutil
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
-from PIL import Image, ImageEnhance
+from PIL import Image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 logging.getLogger("transformers").setLevel(logging.ERROR)
@@ -19,10 +19,11 @@ DEBUG_MODE = True
 
 class OCREngine:
     def __init__(self):
-        print("🚀 v6.0 ENGINE LOADING... (Block Splitter Mode)")
+        print("🚀 v6.1 ENGINE LOADING... (Blur Check + Printed Mode Fix)")
         self.models = {}
         self.processors = {}
         
+        # Load Models
         self._load_model("handwritten", HANDWRITTEN_PATH)
         self._load_model("printed", PRINTED_PATH)
         
@@ -33,6 +34,7 @@ class OCREngine:
     def _load_model(self, name, path):
         try:
             if not os.path.exists(path):
+                # Fallback for path naming variations
                 if name == "handwritten" and "large" in path:
                     path = path.replace("_large", "")
             
@@ -49,7 +51,19 @@ class OCREngine:
         if len(text) < 2 and text.lower() != 'a': return ""
         return text
 
+    # --- NEW: BLUR DETECTION ---
+    def is_blurry(self, image, threshold=100):
+        """
+        Returns True if image is blurry, False otherwise.
+        Threshold: Higher = stricter (needs sharper image). 100 is standard.
+        """
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        score = cv2.Laplacian(gray, cv2.CV_64F).var()
+        print(f"   📉 Blur Score: {score:.2f} (Threshold: {threshold})")
+        return score < threshold, score
+
     def remove_lines(self, image):
+        # NOTE: Only use this for lined paper (handwritten mode)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 25, 10)
         
@@ -65,17 +79,19 @@ class OCREngine:
         return clean_image
 
     def split_tall_boxes(self, boxes, image_height):
- 
         if not boxes: return []
 
         heights = [b[5] for b in boxes]
+        if not heights: return boxes
+        
         median_h = np.median(heights)
         
         final_boxes = []
         for box in boxes:
             min_x, min_y, max_x, max_y, y_center, h = box
             
-            if h > (median_h * 1.8):
+            # Adjusted split threshold logic
+            if h > (median_h * 2.0) and h > 30: # Added minimum pixel check to avoid splitting tiny boxes
                 num_splits = max(2, round(h / median_h))
                 split_h = h // num_splits
                 
@@ -92,9 +108,13 @@ class OCREngine:
                 
         return final_boxes
 
-    def detect_and_merge_lines(self, image):
-        clean_image = self.remove_lines(image)
-        
+    def detect_and_merge_lines(self, image, mode="handwritten"):
+        # FIX 1: Do NOT run remove_lines for printed text/ID cards
+        if mode == "handwritten":
+            clean_image = self.remove_lines(image)
+        else:
+            clean_image = image # Keep original structure for printed forms
+
         results = self.detector.readtext(
             clean_image, 
             width_ths=0.7, 
@@ -110,7 +130,9 @@ class OCREngine:
             min_y, max_y = int(min(tl[1], tr[1])), int(max(bl[1], br[1]))
             
             height = max_y - min_y
-            if height < 15: continue
+            
+            # FIX 2: Lowered threshold from 15 to 8 to catch small ID card text
+            if height < 8: continue 
             
             y_center = (min_y + max_y) // 2
             raw_boxes.append([min_x, min_y, max_x, max_y, y_center, height])
@@ -127,6 +149,7 @@ class OCREngine:
                 continue
             
             avg_h = sum(b[5] for b in current_line) / len(current_line)
+            # Check if box is on the same vertical level
             if abs(box[4] - (sum(b[4] for b in current_line)/len(current_line))) < (avg_h * 0.6):
                 current_line.append(box)
             else:
@@ -143,21 +166,33 @@ class OCREngine:
             max_y = max(b[3] for b in line)
             final_crops.append((min_x, min_y, max_x, max_y))
             
-        return final_crops
+        return final_crops, clean_image
 
     def extract_text(self, image_path, mode="handwritten"):
         original = cv2.imread(image_path)
         if original is None: return "Error: Image not found"
+
+        # 1. Check for Blur
+        is_blur, blur_score = self.is_blurry(original)
+        if is_blur:
+            print(f"⚠️ Warning: Image is blurry (Score: {blur_score:.2f})")
+            # You can choose to return here, or just print a warning.
+            # return "Error: Image is too blurry." 
+
+        # 2. Upscale for Printed ID Cards (Crucial for small text)
+        if mode == "printed":
+            print("🔍 Printed Mode detected: Upscaling image for better detection...")
+            original = cv2.resize(original, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
 
         if DEBUG_MODE:
             debug_dir = "debug_crops"
             if os.path.exists(debug_dir): shutil.rmtree(debug_dir)
             os.makedirs(debug_dir)
 
-        print(f"🔍 Processing {image_path}...")
+        print(f"Processing {image_path}...")
         
-        clean_image = self.remove_lines(original)
-        line_boxes = self.detect_and_merge_lines(original)
+        # Pass mode to detection logic
+        line_boxes, clean_image = self.detect_and_merge_lines(original, mode=mode)
         
         full_text = []
         processor = self.processors.get(mode)
@@ -167,9 +202,10 @@ class OCREngine:
         
         for i, (x1, y1, x2, y2) in enumerate(line_boxes):
             h, w = clean_image.shape[:2]
-           
-            pad_y = 2 
-            pad_x = 10
+            
+            # Adjusted padding for tighter crops on ID cards
+            pad_y = 4 
+            pad_x = 8
             
             y_start, y_end = max(0, y1 - pad_y), min(h, y2 + pad_y)
             x_start, x_end = max(0, x1 - pad_x), min(w, x2 + pad_x)
@@ -177,7 +213,7 @@ class OCREngine:
             crop = clean_image[y_start:y_end, x_start:x_end]
             
             if DEBUG_MODE:
-                cv2.imwrite(f"debug_crops/line_{i}_clean.jpg", crop)
+                cv2.imwrite(f"debug_crops/line_{i}.jpg", crop)
 
             pil_crop = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
             
@@ -197,4 +233,5 @@ class OCREngine:
 engine = OCREngine()
 
 def extract_text(image_path, mode="handwritten"):
+    # Ensure you pass the mode correctly here
     return engine.extract_text(image_path, mode)
