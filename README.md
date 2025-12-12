@@ -65,6 +65,22 @@ File to Download: pytorch_model.bin (~1.33 GB)
 
 Action: Download the file and place it in models/printed/.
 
+
+4. Running the Application
+
+Step 1: Start the Backend
+Open your terminal in the `OCR-MOSIP` folder and run:
+```bash
+python app/main.py
+```
+Wait until you see `Server will be available at: http://localhost:5000`.
+
+Step 2: Access the Frontend
+Once the backend is running, open your browser and go to:
+[http://localhost:5000](http://localhost:5000)
+
+Alternatively, you can simply open the `static/index.html` file directly in your browser.
+
 📂 Project Structure
 
 IMPORTANT: After downloading, ensure your folder structure looks exactly like this, or the code won't find the models:
