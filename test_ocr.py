@@ -11,7 +11,7 @@ from app.ocr_engine import extract_text
 # You can list one file, or multiple files.
 # Make sure these images are in your project root folder (ocr-project/)
 selected_images = [
-    "test_image10.jpg",
+    "test_image13.jpg",
     # "another_image.png",  <-- You can uncomment these to run more
     # "form_sample.jpg"
 ]
@@ -29,7 +29,7 @@ for image_filename in selected_images:
     
     try:
         # Note: You can change mode="printed" if testing printed forms
-        test_result = extract_text(image_filename, mode="printed")
+        test_result = extract_text(image_filename, mode="handwritten")
         
         print("\n--- RESULT ---")
         print(test_result)
