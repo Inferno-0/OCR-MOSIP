@@ -1,132 +1,52 @@
-OCR-MOSIP Project
-
-This project implements an offline OCR system using Microsoft's TrOCR models (Handwritten and Printed).
-
-🚀 Quick Start Guide
-
-1. Clone the Repository
-
-Open your terminal and run:
-
-git clone [https://github.com/Inferno-0/OCR-MOSIP.git](https://github.com/Inferno-0/OCR-MOSIP.git)
-cd OCR-MOSIP
+Welcome! This is our Optical Character Recognition Application that runs locally using Microsoft TrOCR models.
 
 
-2. Set Up Virtual Environment
+OCR-MOSIP — Quick Setup Guidelines
 
-For Windows:
+This file contains minimal, essential setup instructions: how to install Python dependencies and obtain the model files required to run the project.
 
+Prerequisites
+- Python 3.8+ installed.
+
+Create and activate a virtual environment
+
+Windows:
+
+```powershell
 python -m venv venv
 .\venv\Scripts\activate
+```
 
+macOS / Linux:
 
-For Mac/Linux:
-
+```bash
 python3 -m venv venv
 source venv/bin/activate
-
-
-3. Install Dependencies
-
-pip install -r requirements.txt
-
-
-🧠 Model Setup (Critical Step)
-
-⚠️ The AI models (~3GB) are NOT included in this repository to keep it light.
-You must download them using one of the methods below before the code will run.
-
-Option A: Automatic Setup (Recommended)
-
-If the setup_models.py script is included in the root folder, simply run:
-
-python setup_models.py
-
-
-This will attempt to download the necessary weights automatically.
-
-Option B: Manual Download
-
-If the script fails or you prefer manual setup, download the model weights from the official Hugging Face repositories:
-
-1. Handwritten Model:
-
-Source: microsoft/trocr-base-handwritten
-
-File to Download: pytorch_model.bin (~1.33 GB)
-
-Action: Download the file and place it in models/handwritten/.
-
-2. Printed Model:
-
-Source: microsoft/trocr-base-printed
-
-File to Download: pytorch_model.bin (~1.33 GB)
-
-Action: Download the file and place it in models/printed/.
-
-
-4. Running the Application
-
-Step 1: Start the Backend
-Open your terminal in the `OCR-MOSIP` folder and run:
-```bash
-python app/main.py
 ```
-Wait until you see `Server will be available at: http://localhost:5000`.
 
-Step 2: Access the Frontend
-Once the backend is running, open your browser and go to:
-[http://localhost:5000](http://localhost:5000)
+Install Python dependencies
 
-Alternatively, you can simply open the `static/index.html` file directly in your browser.
+```bash
+pip install -r [requirements.txt](requirements.txt)
+```
 
-📂 Project Structure
+Download models
 
-IMPORTANT: After downloading, ensure your folder structure looks exactly like this, or the code won't find the models:
+Option A — Automatic (if available):
 
-OCR-MOSIP/
-├── app/
-├── static/
-├── venv/                 <-- Your local virtual environment
-├── requirements.txt
-└── models/               <-- CREATE THIS FOLDER
-    ├── handwritten/      <-- CREATE THIS SUBFOLDER
-    │   ├── config.json
-    │   └── pytorch_model.bin  <-- Place 1.33GB file here
-    └── printed/          <-- CREATE THIS SUBFOLDER
-        ├── config.json
-        └── pytorch_model.bin  <-- Place 1.33GB file here
+If `setup_models.py` is present, it can attempt to download the required weights automatically:
 
+```bash
+python setup_models.py
+```
 
-🤝 Collaboration & Git Workflow
+Option B — Manual download:
 
-To keep our repository clean and avoid conflicts, please follow these rules:
+- Handwritten model: `microsoft/trocr-base-handwritten` — download the model file (pytorch_model.bin) and place it at `models/handwritten/pytorch_model.bin`.
+- Printed model: `microsoft/trocr-base-printed` — download the model file (pytorch_model.bin) and place it at `models/printed/pytorch_model.bin`.
 
-Never push directly to main. The main branch is for production-ready code only.
+Create the `models/handwritten` and `models/printed` directories if they do not exist before placing the files.
 
-Work on the dev branch.
-
-Before starting work: git checkout dev then git pull origin dev.
-
-Create Feature Branches.
-
-For every new task, create a branch: git checkout -b feature/my-task-name.
-
-Pushing Code:
-
-git add .
-
-git commit -m "Description of work"
-
-git push origin feature/my-task-name
-
-Merging: Create a Pull Request (PR) on GitHub to merge your feature into dev.
-
-🛠 Troubleshooting
-
-"Module not found" error?
-Make sure you activated the virtual environment (venv) before running the code.
-
-"Model not found" error?
-Check the models/ folder structure. It must match the diagram above exactly.
+Notes
+- The model files are large (~1–1.5 GB each). Download from Hugging Face or your chosen model host.
+- After installing dependencies and placing the model files, the application should be able to run locally.
