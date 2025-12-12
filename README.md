@@ -1,4 +1,7 @@
-OCR-MOSIP — Quick Setup
+Welcome! This is our Optical Character Recognition Application that runs locally using Microsoft TrOCR models.
+
+
+OCR-MOSIP — Quick Setup Guidelines
 
 This file contains minimal, essential setup instructions: how to install Python dependencies and obtain the model files required to run the project.
 
