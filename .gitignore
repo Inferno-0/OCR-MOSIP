@@ -18,3 +18,9 @@ ocr_results.txt
 *.jpg
 *.jpeg
 *.png
+
+# 5. Documentation/Conversion Files (Temporary)
+convert_to_pdf.py
+convert_to_html.py
+ocr_mosip_architecture_analysis.html
+*.pdf
